@@ -2,8 +2,7 @@
 #include <windows.h>
 #include <conio.h>
 #include <stdlib.h>
-#include <fstream>/*
-#include <string>*/
+#include <fstream>
 using namespace std;
 const char enemy = 20, player = 2, wall = 178;
 bool flag = true;
@@ -11,38 +10,6 @@ int n = 1, m = 1, score = 0;
 int i = 18, j = 48;
 void movement(char arr[][50]);
 void menu(char arr[][50]);
-//void addscore()
-//{
-//	string str;
-//	ofstream store; ifstream fin;
-//	store.open("Scores.txt");
-//	fin.open("Scores.txt");
-//	if (store.is_open() && fin.is_open())
-//	{
-//		while (!fin.eof())
-//		{
-//			fin >> str;
-//		}
-//		if (stoi(str) < score)
-//		{
-//			store << "Score = " << score << endl;
-//		}
-//	}
-//	fin.close();
-//	store.close();
-//}
-//void displayscore()
-//{
-//	ifstream fin;
-//	string str;
-//	fin.open("Scores.txt");
-//	while (!fin.eof())
-//	{
-//		getline(fin, str);
-//		cout << str << endl;
-//	}
-//	fin.close();
-//}
 
 void cursor()
 {
@@ -220,7 +187,6 @@ void opp(char arr[][50], int& i, int& j)
 	}
 	if (arr[i][j] == player)
 	{
-		//addscore();
 		system("cls");
 		system("color 4");
 		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGame Over!\n\n\n\n";
@@ -420,10 +386,9 @@ void menu(char arr[][50])
 	system("cls");
 	system("color d");
 	cout << " 1) start New Game" << endl;
-	cout << " 2) See Highscore" << endl;
-	cout << " 3) continue game\n";
-	cout << " 4) Help" << endl;
-	cout << " 5) Exit" << endl;
+	cout << " 2) continue game\n";
+	cout << " 3) Help" << endl;
+	cout << " 4) Exit" << endl;
 	char option;
 	option = _getch();
 	if (option == '1')
@@ -441,14 +406,7 @@ void menu(char arr[][50])
 		movement(arr);
 
 	}
-	else if (option == '2')
-	{
-		system("cls");
-		//displayscore();
-		system("pause");
-		menu(arr);
-	}
-	else if (option == '4')
+	else if (option == '3')
 	{
 		system("cls");
 		system("color b");
@@ -471,11 +429,11 @@ void menu(char arr[][50])
 		system("pause");
 		menu(arr);
 	}
-	else if (option == '3')
+	else if (option == '2')
 	{
 		movement(arr);
 	}
-	else if (option == '5')
+	else if (option == '4')
 	{
 		system("cls");
 		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGAME EXIIED\n\n\n\n\n\n\n" << endl;
