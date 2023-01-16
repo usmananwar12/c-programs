@@ -1,15 +1,53 @@
-﻿#include <iostream>
-#include <windows.h>
-#include <conio.h>
+#include <iostream>
 #include <stdlib.h>
-#include <fstream>
+#include <conio.h>
+#include <windows.h>
+#include<fstream>
+
 using namespace std;
-const char enemy = 20, player = 2, wall = 178;
+int n = 18, m = 12;//player index
+int i = 18, j = 7;//enemy index
+int lives = 3, score = 0;
 bool flag = true;
-int n = 1, m = 1, score = 0;
-int i = 18, j = 48;
-void movement(char arr[][50]);
-void menu(char arr[][50]);
+int speed = 500;
+void player(char arr[][20]);
+void menu(char arr[][20]);
+
+void addscore()//function for highscores
+{
+	ifstream input;
+	input.open("text.txt");
+	int s_arr[10], update = 0;
+	while (!input.eof())
+	{
+		for (int I = 0; I < 10; I++)
+		{
+			input >> s_arr[I];
+		}
+	}
+	input.close();
+	for (int k = 0; k < 10; k++)
+	{
+		cout << s_arr[k] << endl;
+	}
+	for (int m = 0; m < 10; m++)
+	{
+		if (score > s_arr[m])
+		{
+			s_arr[m] = score;
+			break;
+		}
+	}
+	cout << endl;
+	
+	ofstream output;
+	output.open("text.txt");
+	for (int j = 0; j < 10; j++)
+	{
+		output << s_arr[j] << endl;
+	}
+	output.close();
+}
 
 void cursor()
 {
@@ -21,47 +59,130 @@ void cursor()
 	SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 
 }
-void display(char arr[][50])//function to display the arr on console
+
+void display(char arr[][20])//function to display the arr on console
 {
 	cursor();
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
-	cout << "\t\tScore = " << score << endl;
+	cout << "\t\t score = " << score << "\tLives: " << lives << endl;
 	for (int i = 0; i < 20; i++)
 	{
 		cout << "\t\t";
-		for (int j = 0; j < 50; j++)
+		for (int j = 0; j < 20; j++)
 		{
-			cout << arr[i][j];
+			cout << " " << arr[i][j] << " ";
 		}
 		cout << endl;
 	}
 	system("color 6");//it is at the end so that when ever the color chanages to red when life is deducted it will go back to orange 
 }
-void board(char arr[][50])
+
+void board(char arr[][20])
 {
+	//background
 	for (int i = 0; i < 20; i++)//first initialize with a dot
 	{
-		for (int j = 0; j < 50; j++)
+		for (int j = 0; j < 20; j++)
 		{
 			arr[i][j] = '.';
 		}
 	}
-	for (int i = 0; i < 50; i++) //outside border
+	for (int i = 0; i < 20; i++) //outside border
 	{
-		arr[0][i] = wall;
-		arr[19][i] = wall;
+		arr[i][0] = '*';
+		arr[i][19] = '*';
+		arr[0][i] = '*';
+		arr[19][i] = '*';
 	}
-	for (int i = 0; i < 20; i++)
+	for (int i = 2; i < 18; i++)//2nd border
 	{
-		arr[i][0] = wall;
-		arr[i][49] = wall;
+		arr[i][2] = '*';
+		arr[i][17] = '*';
+		arr[2][i] = '*';
+		arr[17][i] = '*';
 	}
-}
-void up(char arr[][50])//w 
-{
-	if (n - 1 > 0 && arr[n - 1][m] != wall) {
-		if (arr[n - 1][m] != '*')
+	for (int i = 4; i < 16; i++)//3rd border
+	{
+		arr[i][4] = '*';
+		arr[i][15] = '*';
+		arr[4][i] = '*';
+		arr[15][i] = '*';
+	}
+	for (int i = 6; i < 14; i++)//forth border
+	{
+		arr[i][6] = '*';
+		arr[i][13] = '*';
+		arr[6][i] = '*';
+		arr[13][i] = '*';
+	}
+
+	for (int i = 8; i <= 11; i++)//removing the part where there is blank
+	{
+		for (int j = 0; j < 20; j++)
 		{
+			arr[i][j] = ' ';
+			arr[j][i] = ' ';
+		}
+	}
+	for (int i = 8; i <= 11; i++)//adding the inside box
+	{
+		arr[i][7] = '*';
+		arr[i][12] = '*';
+		arr[8][i] = '*';
+		arr[11][i] = '*';
+	}
+	//making dots as score 
+	//it should be with one index left blank and dot on the next
+	for (int i = 1; i < 19; i += 2)//for first path
+	{
+		arr[i][1] = ' ';
+		arr[i][18] = ' ';
+		arr[1][i] = ' ';
+		arr[18][i] = ' ';
+	}
+	for (int i = 3; i < 17; i += 2)//2nd path
+	{
+		arr[i][3] = ' ';
+		arr[i][16] = ' ';
+		arr[3][i] = ' ';
+		arr[16][i] = ' ';
+	}
+	for (int i = 5; i < 15; i += 2)//3rd path
+	{
+		arr[i][5] = ' ';
+		arr[i][14] = ' ';
+		arr[5][i] = ' ';
+		arr[14][i] = ' ';
+	}
+	//central box
+	for (int i = 8; i < 12; i++)
+	{
+		arr[i][7] = ' ';
+	}
+	for (int i = 8; i < 12; i++)
+	{
+		arr[i][12] = ' ';
+	}
+	for (int i = 9; i < 11; i++)
+	{
+		arr[i][8] = '*';
+	}
+	for (int i = 9; i < 11; i++)
+	{
+		arr[i][8] = '*';
+	}
+	for (int i = 9; i < 11; i++)
+	{
+		arr[i][11] = '*';
+	}
+
+}
+
+//these will be called for each input (w a s d) form imput function
+void up(char arr[][20])//w 
+{
+	if (n - 1 > 0) {
+		if (arr[n - 1][m] != '*') {
 			n--;
 			arr[n + 1][m] = ' ';
 		}
@@ -70,27 +191,22 @@ void up(char arr[][50])//w
 		}
 	}
 }
-void down(char arr[][50])//s
+void down(char arr[][20])//s
 {
-	if (n + 1 < 49 && arr[n + 1][m] != wall)
-	{
-		if (arr[n + 1][m] != '*')
-		{
+	if (n + 1 < 19) {
+		if (arr[n + 1][m] != '*') {
 			n++;
 			arr[n - 1][m] = ' ';
 		}
-		if (arr[n][m] == '.')//score counter 
-		{
+		if (arr[n][m] == '.') {//score counter
 			score++;
 		}
 	}
-	arr[n][m] = player;
 }
-void left(char arr[][50])//a
+void left(char arr[][20])//a
 {
-	if (m - 1 > 0 && arr[n][m - 1] != wall) {
-		if (arr[n][m - 1] != '*')
-		{
+	if (m - 1 > 0) {
+		if (arr[n][m - 1] != '*') {
 			m--;
 			arr[n][m + 1] = ' ';
 		}
@@ -99,120 +215,180 @@ void left(char arr[][50])//a
 		}
 	}
 }
-void right(char arr[][50])//d
+void right(char arr[][20])//d
 {
-	if (m + 1 < 49 && arr[n][m + 1] != wall) {
-		if (arr[n][m + 1] != '*')
-		{
+	if (m + 1 < 19) {
+		if (arr[n][m + 1] != '*') {
 			m++;
 			arr[n][m - 1] = ' ';
 		}
+
 		if (arr[n][m] == '.') {//score counter
 			score++;
 		}
 	}
 }
-void opp(char arr[][50], int& i, int& j)
+
+
+//these are for enemy
+void oppdown(char arr[][20])
 {
-	if (i > n && arr[i - 1][j] != wall)
+	char temp = ' ';
+
+
+	if (arr[i + 1][j] != '*')
 	{
-		if (arr[i - 1][j] == ' ')
+		temp = arr[i + 1][j];
+		if (temp == '@')
 		{
-			i--;
-			arr[i + 1][j] = ' ';
+			system("color 4");
+			lives--;
+			temp = ' ';
 		}
-		else if (arr[i - 1][j] == '.')
-		{
-			i--;
-			arr[i + 1][j] = '.';
-		}
-		else if (arr[i - 1][j] == player)
-		{
-			i--;
-			arr[i + 1][j] = ' ';
-		}
+		i++;
+		arr[i - 1][j] = temp;
+
+		arr[i][j] = '$';//enemy
+		player(arr);
 	}
-	else if (i < n && arr[i + 1][j] != wall)
+
+}
+void oppright(char arr[][20])
+{
+	char temp = ' ';
+	if (arr[i][j + 1] != '*')
 	{
-		if (arr[i + 1][j] == ' ')
+		temp = arr[i][j + 1];
+		if (temp == '@')
 		{
-			i++;
-			arr[i - 1][j] = ' ';
+			system("color 4");
+			lives--;
+			temp = ' ';
 		}
-		else if (arr[i + 1][j] == '.')
-		{
-			i++;
-			arr[i - 1][j] = '.';
-		}
-		else if (arr[i + 1][j] == player)
-		{
-			i++;
-			arr[i - 1][j] = ' ';
-		}
+		j++;
+		arr[i][j - 1] = temp;
+
+		arr[i][j] = '$';//enemy
+		player(arr);
 	}
-	if (j > m && arr[i][j - 1] != wall)
+
+}
+void oppup(char arr[][20])
+{
+	char temp = ' ';
+
+	if (arr[i - 1][j] != '*')
 	{
-		if (arr[i][j - 1] == ' ')
+		temp = arr[i - 1][j];
+		if (temp == '@')
 		{
-			j--;
-			arr[i][j + 1] = ' ';
+			system("color 4");
+			lives--;
+			temp = ' ';
 		}
-		else if (arr[i][j - 1] == '.')
-		{
-			j--;
-			arr[i][j + 1] = '.';
-		}
-		else if (arr[i][j - 1] == player)
-		{
-			j--;
-			arr[i][j + 1] = ' ';
-		}
+		i--;
+		arr[i + 1][j] = temp;
+
+		arr[i][j] = '$';//enemy
+		player(arr);
 	}
-	else if (j < m && arr[i][j + 1] != wall) {
-		if (arr[i][j + 1] == ' ')
+}
+void oppleft(char arr[][20])
+{
+	char temp = ' ';
+
+
+	if (arr[i][j - 1] != '*')//a
+	{
+
+		temp = arr[i][j - 1];
+		if (temp == '@')
 		{
-			j++;
-			arr[i][j - 1] = ' ';
+			system("color 4");
+			lives--;
+			temp = ' ';
 		}
-		else if (arr[i][j + 1] == '.')
-		{
-			j++;
-			arr[i][j - 1] = '.';
-		}
-		else if (arr[i][j + 1] == player)
-		{
-			j++;
-			arr[i][j - 1] = ' ';
-		}
+		j--;
+		arr[i][j + 1] = temp;
+
+		arr[i][j] = '$';//enemy
+		player(arr);
 	}
-	if (arr[i][j] == player)
+
+}
+
+
+void oppmovement1(char arr[][20])
+{
+	if (lives == 0)//if game over output color will be red and game over will be printed on the screen
 	{
 		system("cls");
 		system("color 4");
-		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGame Over!\n\n\n\n";
+		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGAME OVER!123\n\n\n\n";
+		Sleep(1000);
 		flag = false;
-		Sleep(2500);
 		return;
 	}
-}
-void input(char arr[][50])//this function will be uesd to take inputs from the user
-{
-	char input;
-	input = _getch();
-	if (input == 's') {//dowm
+	while (i != 18 && j == 18)
+	{
+		oppdown(arr);
+	}
+	while (j != 1 && i != 1)
+	{
+		oppleft(arr);
+	}
 
+	while (i != 1)
+	{
+		oppup(arr);
+	}
+	while (j != 18)
+	{
+		oppright(arr);
+	}
+	Sleep(speed);
+}
+void oppmovement2(char arr[][20])
+{
+	while (i != 18 && j == 18)
+	{
+		oppdown(arr);
+	}
+	while (j != 1 && i != 1)
+	{
+		oppleft(arr);
+	}
+
+	while (i != 1)
+	{
+		oppup(arr);
+	}
+	while (j != 18)
+	{
+		oppright(arr);
+	}
+}
+
+
+
+void input(char arr[][20])//this function will be uesd to take inputs from the user
+{
+	char input = _getch();
+
+	if (input == 's') {//dowm
+		
 		down(arr);
 	}
 	else if (input == 'a') {//left
-
+		
 		left(arr);
 	}
 	else if (input == 'w') {//up
-
+		
 		up(arr);
 	}
 	else if (input == 'd') {//rigth
-
+		
 		right(arr);
 	}
 	else if (input == 'p') //game will be paused whenever p is pessed 
@@ -222,227 +398,232 @@ void input(char arr[][50])//this function will be uesd to take inputs from the u
 		Sleep(1000);
 		menu(arr);
 	}
-	else if (input == 'D' && arr[n][m + 1] != enemy)//to add wall
-	{
-		arr[n][m + 1] = wall;
-	}
-	else if (input == 'A' && arr[n][m - 1] != enemy)
-	{
-		arr[n][m - 1] = wall;
-	}
-	else if (input == 'W' && arr[n - 1][m] != enemy)
-	{
-		arr[n - 1][m] = wall;
-	}
-	else if (input == 'S' && arr[n + 1][m] != enemy)
-	{
-		arr[n + 1][m] = wall;
-	}
 }
-void movement(char arr[][50])
+void player(char arr[][20])
 {
-	int k = 0, l = 0, o = 0, p = 0, q = 0, r = 0, s = 0, t = 0, u = 0, v = 0;
-	int a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
-	while (flag)
-	{
-		input(arr);
-		if (arr[i][j] == player || arr[k][l] == player || arr[o][p] == player || arr[q][r] == player || arr[s][t] == player || arr[u][v] == player)
+	static int l = 1;
+	arr[n][m] = '@';//player
+
+	while (lives > 0 && l < 5)
+	{//while alive
+
+		if (n > 9) {//lower half
+			if ((arr[n][m + 1] == ' ' || arr[n][m + 1] == '.' || arr[n][m + 1] == '$') && (arr[n][m - 1] == ' ' || arr[n][m - 1] == '.') && arr[n + 1][m] == '*' && arr[n - 1][m] == '*' || (n == 14 && m == 5) || (n == 16 && m == 3) || (n == 18 && m == 1)) {//if its in a path
+				m++;
+				if (arr[n][m] == '.') {//score counter
+					score++;
+				}
+				else if (arr[n][m] == '$') {//meet opponent
+					lives--;
+					system("color 4");
+				}
+				arr[n][m] = '@';
+				arr[n][m - 1] = ' ';
+				display(arr);
+			}
+		}
+		else // upperhalf
 		{
-			//addscore();
+			if ((arr[n][m + 1] == ' ' || arr[n][m + 1] == '.') && (arr[n][m - 1] == ' ' || arr[n][m - 1] == '.' || arr[n][m - 1] == '$') && arr[n + 1][m] == '*' && arr[n - 1][m] == '*' || (n == 1 && m == 18) || (n == 3 && m == 16) || (n == 5 && m == 14)) {
+				m--;
+				if (arr[n][m] == '.') {//score counter
+					score++;
+				}
+				else if (arr[n][m] == '$') {//meet opponent
+					lives--;
+					system("color 4");
+				}
+				arr[n][m] = '@';
+				arr[n][m + 1] = ' ';
+				display(arr);
+			}
+		}
+		if (m > 13) {//rigth half
+			if (arr[n][m - 1] == '*' && (arr[n][m + 1] == '*' || arr[n][m + 1] == ' ') && (arr[n - 1][m] == ' ' || arr[n - 1][m] == '.' || arr[n - 1][m] == '$') && (arr[n + 1][m] == ' ' || arr[n + 1][m] == '.') || (n == 16 && m == 16) /*|| n == 18 && m == 18*/ || (n == 14 && m == 14))
+			{
+				for (int l = 0; l < 2; l++) {
+					n--;
+					if (arr[n][m] == '.') {//score counter
+						score++;
+					}
+					else if (arr[n][m] == '$') {//meet opponent
+						lives--;
+						system("color 4");
+					}
+					arr[n][m] = '@';
+					if (arr[n + 1][m] != '*') {
+						arr[n + 1][m] = ' ';
+					}
+					display(arr);
+				}
+			}
+			else if (n == 18 && m == 18 || arr[n - 1][m] == '$')//for bottom-rigth corner
+			{
+				n--;
+				if (arr[n][m] == '.') {//score counter
+					score++;
+				}
+				else if (arr[n][m] == '$') {//meet opponent
+					lives--;
+					system("color 4");
+				}
+				arr[n][m] = '@';
+				if (arr[n + 1][m] != '*') {
+					arr[n + 1][m] = ' ';
+				}
+				display(arr);
+			}
+		}
+		else if (m < 7)//left half
+		{
+			for (int l = 0; l < 2; l++) 
+			{
+				if ((arr[n][m + 1] == '*' || arr[n][m + 1] == ' ') && arr[n][m - 1] == '*' && (arr[n + 1][m] == ' ' || arr[n + 1][m] == '.' || arr[n + 1][m] == '$') && (arr[n - 1][m] == ' ' || arr[n - 1][m] == '.') || (n == 1 && m == 1) || (m == 3 && n == 3) || (n == 5 && m == 5))
+				{
+					n++;
+					if (arr[n][m] == '.')//score counter
+					{
+						score++;
+					}
+					else if (arr[n][m] == '$') //meet opponent
+					{
+						lives--;
+						system("color 4");
+					}
+					arr[n][m] = '@';
+					if (arr[n - 1][m] != '*') {
+						arr[n - 1][m] = ' ';
+					}
+					display(arr);
+				}
+			}
+		}
+		if (arr[n + 1][m] == ' ' && arr[n - 1][m] == ' ' || n == 11 || n == 8 || n == 0 || m == 0 || (n >= 7 && n <= 12 && m >= 7 && m <= 12)) 
+		{
+			input(arr);
+		}
+		if (score == 50) {//total score is 50 thus win at 50 score
+			system("cls");
+			system("color 2");
+			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tWINNER!!!\n\n\n";
+			Sleep(1000);
+			l++;
+			if (l > 4) {
+				system("color 5");
+				cout << "\t\t\tCongratulations you have completed the game have a cupcake\n\n\n\n\n";
+				system("pause");
+				break;
+			}
+			system("cls");
+			system("color 3");
+			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tlevel " << l << "\n\n\n\n";
+			Sleep(1000);
+			board(arr);
+			i = 18; j = 7; n = 18; m = 12;
+			score = 0;
+			speed -= 125;
+			arr[i][j] = '$';//enemy
+			arr[n][m] = '@';//player
+			display(arr);
+			player(arr);
+			flag = false;
+			break;
+		}
+		arr[n][m] = '@';//player
+		display(arr); 
+		if (j == 3 && i <= 16 && i >= 3 || (i == 3 && (j >= 3 && j <= 16)) || (j == 16 && (i >= 3 && i <= 16)))
+		{
+			oppmovement2(arr);
+		}
+		else
+		{
+			oppmovement1(arr);
+		}
+		if (lives == 0)//if game over output color will be red and game over will be printed on the screen
+		{
 			system("cls");
 			system("color 4");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGame Over!\n\n\n\n";
-			flag = false;
-			Sleep(2500);
-			break;
-		}
-		arr[n][m] = player;
-		opp(arr, i, j);
-		arr[i][j] = enemy;
-		if (score == 100)
-		{
-			system("cls");
-			system("color d");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tLevel 2\n\n\n\n";
-			Sleep(500);
-			score++;
-			k = 18; l = 48;
-			system("cls");
-		}
-		else if (score >= 100)
-		{
-			opp(arr, k, l);
-			arr[k][l] = enemy;
-		}
-		if (score == 200)
-		{
-			system("cls");
-			system("color d");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tLevel 3\n\n\n\n";
-			Sleep(500);
-			score++;
-			o = 18; p = 40;
-			system("cls");
-		}
-		else if (score >= 200)
-		{
-			opp(arr, o, p);
-			arr[o][p] = enemy;
-		}
-		if (score == 300)
-		{
-			system("cls");
-			system("color d");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tLevel 4\n\n\n\n";
-			Sleep(500);
-			score++;
-			q = 18; r = 45;
-			system("cls");
-		}
-		else if (score >= 300)
-		{
-			opp(arr, q, r);
-			arr[q][r] = enemy;
-		}
-
-		if (score == 450)
-		{
-			system("cls");
-			system("color d");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tLevel 5\n\n\n\n";
-			Sleep(500);
-			score++;
-			s = 10; t = 48;
-			system("cls");
-		}
-		else if (score >= 450)
-		{
-			opp(arr, s, t);
-			arr[s][t] = enemy;
-		}
-		if (score == 600)
-		{
-			system("cls");
-			system("color d");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\Level 6\n\n\n\n";
-			Sleep(500);
-			u = 18; v = 10;
-			score++;
-			system("cls");
-		}
-		else if (score > 60)
-		{
-
-			opp(arr, u, v);
-			arr[u][v] = enemy;
-		}
-		if (score == 620)
-		{
-			system("cls");
-			system("color d");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tFinal Level\n\n\n\n";
-			Sleep(500);
-			score++;
-			a = 18; b = 10; c = 12; d = 45;
-			e = 13; f = 35; g = 12; h = 20;
-			system("cls");
-		}
-		else if (score >= 620)
-		{
-			opp(arr, a, b);
-			arr[a][b] = enemy;
-			opp(arr, c, d);
-			arr[c][d] = enemy;
-			opp(arr, e, f);
-			arr[e][f] = enemy;
-			opp(arr, g, h);
-			arr[g][h] = enemy;
-		}
-		if (arr[i][j] == player || arr[k][l] == player || arr[o][p] == player || arr[q][r] == player || arr[s][t] == player || arr[u][v] == player)
-		{
-			//addscore();
-			system("cls");
-			system("color 4");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGame Over!\n\n\n\n";
-			flag = false;
-			Sleep(2500);
-			break;
-		}
-
-		if (score == 650)
-		{
-			system("cls");
-			system("color 9");
-			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tWinner!\n\n\n\n";
-			Sleep(2000);
+			cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGAME OVER!\n\n\n\n";
+			Sleep(1000);
 			flag = false;
 			break;
 		}
-		display(arr);
 	}
 }
-void menu(char arr[][50])
+
+void menu(char arr[][20])
 {
 	system("cls");
-	system("color d");
+	system("color a");//green
+	cout << "====================================================DODGE EM================================================== \n         ============================================MENU===============================================" << endl;
 	cout << " 1) start New Game" << endl;
-	cout << " 2) continue game\n";
-	cout << " 3) Help" << endl;
-	cout << " 4) Exit" << endl;
+	cout << " 2) See Highscore" << endl;
+	cout << " 3) continue game\n";
+	cout << " 4) Help" << endl;
+	cout << " 5) Exit" << endl;
 	char option;
-	option = _getch();
+	option=_getch();
 	if (option == '1')
 	{
 		system("cls");
 		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tLevel 1\n\n\n\n";
 		Sleep(1000);
 		board(arr);
-		n = 1; m = 1; i = 18; j = 48;
-		arr[n][m] = player;
-		arr[i][j] = enemy;
+		i = 18; j = 7; n = 18; m = 12;
+		arr[i][j] = '$';//enemy
+		arr[n][m] = '@';//player
 		system("color 6");
-		system("cls");
 		display(arr);
-		movement(arr);
+		player(arr);
 
 	}
-	else if (option == '3')
+	else if (option == '2')
+	{
+		system("cls");
+		/*for (int i = 0; i < 10; i++)
+		{
+			cout << scores[i] << endl;;
+		}*/
+		addscore();
+		system("pause");
+		menu(arr);
+	}
+	else if (option == '4')
 	{
 		system("cls");
 		system("color b");
 		cout << "Moves:-\n";
 		cout << "w = up\ns = down\na = left\nd = rigth\np = pause\n\n";
-		cout << "Moves to add blocks:-\n";
-		cout << "shift + w (W) = block above the player\n";
-		cout << "shift + s (S) = block under the player\n";
-		cout << "shift + a (A) = block left to the player\n";
-		cout << "shift + d (D) = block rigth to the player player\n\n";
-		cout << "Player = " << player << "\n";
-		cout << "enemy = " << enemy << "\n\n\n";
-		cout << "Rules:-\n";
-		cout << "dots on the map increases scores\n";
-		cout << "after certain score level will increase\n";
-		cout << "With incrrease in level number of enemies increase\n";
-		cout << "enemy will follow the player\n";
-		cout << "Player should place blocks in a way that the enemy will be stuck\n";
-		cout << "player will win when player is at level 6 and score is equal to 650\n\n\n";
+		cout << "For further help contact us at:\nwww.atari.com/dodge.em\n" << endl;
 		system("pause");
 		menu(arr);
 	}
-	else if (option == '2')
+	else if (option == '3')
 	{
-		movement(arr);
+		player(arr);
 	}
-	else if (option == '4')
+	else if (option == '5')
 	{
 		system("cls");
-		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tGAME EXIIED\n\n\n\n\n\n\n" << endl;
+		cout << "\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t\t\tPORGRAM EXIIED\n\n\n\n\n\n\n" << endl;
+	}
+	else
+	{
+		menu(arr);
 	}
 }
+
 int main()
 {
-	char arr[20][50];
+	char arr[20][20];
 	board(arr);
+	system("color c");//redish
+	cout << "----------Dodge-em----------\n\n";
+	cout << "Developers:-\n";
+	cout << "Muhamamd Usman Anwar\nUmer Rashid\nMuhammad Sarmad\n\n";
+	cout << "----------------------------\n\n";
+	cout << "w = up\ns = down\na = left\nd = rigth\n\n";
+	system("pause");
 	menu(arr);
 	return 0;
 }
